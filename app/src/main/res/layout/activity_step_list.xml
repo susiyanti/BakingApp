@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.example.susiyanti.bakingapp.RecipeStepListActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:scrollbarStyle="insideInset"
+            style="@android:style/Widget.Holo.ScrollView"
+            android:clipToPadding="false"
+            android:scrollIndicators="top|bottom"
+            android:scrollbarAlwaysDrawVerticalTrack="false"
+            android:isScrollContainer="false"
+            android:fillViewport="false">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:textSize="16sp"
+                android:id="@+id/recipe_ingredients"
+                android:padding="15dp" />
+        </ScrollView>
+
+        <include layout="@layout/step_list" />
+    </LinearLayout>
+
+</android.support.design.widget.CoordinatorLayout>
