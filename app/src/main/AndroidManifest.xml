@@ -21,6 +21,7 @@
         <activity
             android:name=".RecipeStepListActivity"
             android:label="@string/title_step_list"
+            android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".RecipeStepDetailActivity"
