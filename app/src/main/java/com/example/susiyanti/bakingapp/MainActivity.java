@@ -1,6 +1,7 @@
 package com.example.susiyanti.bakingapp;
 
 import android.content.Intent;
+import android.support.test.espresso.IdlingResource;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -15,10 +16,20 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Lis
     static String SELECTED_STEPS="Selected_Steps";
     static String SELECTED_INDEX="Selected_Index";
 
+    private SimpleIdlingResource mIdlingResource;
+
+    public IdlingResource getIdlingResource() {
+        if (mIdlingResource == null) {
+            mIdlingResource = new SimpleIdlingResource();
+        }
+        return mIdlingResource;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getIdlingResource();
     }
 
     @Override

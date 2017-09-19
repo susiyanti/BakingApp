@@ -7,10 +7,13 @@ import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -65,17 +68,25 @@ public class RecipeStepListActivity extends AppCompatActivity implements RecipeS
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
         setSupportActionBar(toolbar);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setTitle(recipeName);
 
         View recyclerView = findViewById(R.id.step_list);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
 
+        ArrayList<String> recipeIngredientsForWidgets= new ArrayList<>();
         ingredients = (TextView) findViewById(R.id.recipe_ingredients);
         for (Ingredient in : recipe.get(0).getIngredients()){
             ingredients.append(in.getQuantity()+" "+in.getMeasure() +" "+in.getIngredient()+"\n");
+            recipeIngredientsForWidgets.add(in.getIngredient()+"\n"+
+                    "Quantity: "+in.getQuantity().toString()+"\n"+
+                    "Measure: "+in.getMeasure()+"\n");
         }
+        UpdateBakingService.startBakingService(this,recipeIngredientsForWidgets);
 
         if (findViewById(R.id.step_detail_container) != null) {
             // The detail container view will be present only in the
@@ -206,5 +217,24 @@ public class RecipeStepListActivity extends AppCompatActivity implements RecipeS
         super.onSaveInstanceState(outState);
         outState.putString("Title",recipeName);
         outState.putParcelableArrayList(SELECTED_RECIPES, recipe);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            // This ID represents the Home or Up button. In the case of this
+            // activity, the Up button is shown. Use NavUtils to allow users
+            // to navigate up one level in the application structure. For
+            // more details, see the Navigation pattern on Android Design:
+            //
+            // http://developer.android.com/design/patterns/navigation.html#up-vs-back
+            //
+
+            Intent up = new Intent(this, MainActivity.class);
+            NavUtils.navigateUpTo(this, up);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

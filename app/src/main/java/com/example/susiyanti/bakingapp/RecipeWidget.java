@@ -3,11 +3,14 @@ package com.example.susiyanti.bakingapp;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
 
 import java.util.ArrayList;
+
+import static com.example.susiyanti.bakingapp.UpdateBakingService.FROM_ACTIVITY_INGREDIENTS_LIST;
 
 /**
  * Implementation of App Widget functionality.
@@ -16,7 +19,9 @@ public class RecipeWidget extends AppWidgetProvider {
 
     public static String REMOTEVIEW_INGREDIENT_LIST="REMOTEVIEW_INGREDIENT_LIST";
     public static String REMOTEVIEW_BUNDLE="REMOTEVIEW_BUNDLE";
+
     static ArrayList<String> ingredientsList = new ArrayList<>();
+
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
 
@@ -42,10 +47,7 @@ public class RecipeWidget extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        // There may be multiple widgets active, so update all of them
-        for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId);
-        }
+
     }
 
     @Override
@@ -56,6 +58,27 @@ public class RecipeWidget extends AppWidgetProvider {
     @Override
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
+    }
+
+    public void onReceive(Context context, Intent intent) {
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, RecipeWidget.class));
+
+        final String action = intent.getAction();
+
+        if (action.equals("android.appwidget.action.APPWIDGET_UPDATE2")) {
+            ingredientsList = intent.getExtras().getStringArrayList(FROM_ACTIVITY_INGREDIENTS_LIST);
+            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_grid_view);
+            //Now update all widgets
+            RecipeWidget.updateBakingWidgets(context, appWidgetManager, appWidgetIds);
+            super.onReceive(context, intent);
+        }
+    }
+
+    private static void updateBakingWidgets(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        for (int appWidgetId : appWidgetIds) {
+            updateAppWidget(context, appWidgetManager, appWidgetId);
+        }
     }
 }
 

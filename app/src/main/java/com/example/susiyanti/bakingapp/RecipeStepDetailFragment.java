@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 
 import com.example.susiyanti.bakingapp.model.Recipe;
 import com.example.susiyanti.bakingapp.model.Step;
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
@@ -68,6 +70,9 @@ public class RecipeStepDetailFragment extends Fragment {
     ArrayList<Recipe> recipe;
     String recipeName;
 
+    private int resumeWindow;
+    private long resumePosition;
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -90,6 +95,8 @@ public class RecipeStepDetailFragment extends Fragment {
                 steps = savedInstanceState.getParcelableArrayList(SELECTED_STEPS);
                 selectedIndex = savedInstanceState.getInt(SELECTED_INDEX);
                 recipeName = savedInstanceState.getString("Title");
+                resumePosition = savedInstanceState.getLong("resumePosition");
+                resumeWindow = savedInstanceState.getInt("resumeWindow");
             }
             else {
                 steps =getArguments().getParcelableArrayList(SELECTED_STEPS);
@@ -97,8 +104,6 @@ public class RecipeStepDetailFragment extends Fragment {
                 recipeName=getArguments().getString("Title");
             }
         }
-
-        Activity activity = this.getActivity();
     }
 
 
@@ -118,7 +123,7 @@ public class RecipeStepDetailFragment extends Fragment {
         if (recipeName != null) {
             textView = ((TextView) rootView.findViewById(R.id.recipe_step_detail_text));
             textView.setText(steps.get(selectedIndex).getDescription());
-            simpleExoPlayerView = (SimpleExoPlayerView) rootView.findViewById(R.id.playerView);
+            simpleExoPlayerView = (SimpleExoPlayerView) rootView.findViewById(R.id.stepplayerView);
             simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
 
             String videoURL = steps.get(selectedIndex).getVideoURL();
@@ -131,7 +136,7 @@ public class RecipeStepDetailFragment extends Fragment {
             }
 
             if (!videoURL.isEmpty()) {
-                initializePlayer(Uri.parse(steps.get(selectedIndex).getVideoURL()));
+                initializePlayer();
                 if (isInLandscapeMode(getContext())){
                     textView.setVisibility(View.GONE);
                 }else{
@@ -178,11 +183,10 @@ public class RecipeStepDetailFragment extends Fragment {
                     }
                 }});
         }
-
         return rootView;
     }
 
-    private void initializePlayer(Uri mediaUri) {
+    private void initializePlayer() {
         if (player == null) {
             TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
             DefaultTrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
@@ -192,8 +196,12 @@ public class RecipeStepDetailFragment extends Fragment {
             simpleExoPlayerView.setPlayer(player);
 
             String userAgent = Util.getUserAgent(getContext(), "Baking App");
-            MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(getContext(), userAgent), new DefaultExtractorsFactory(), null, null);
-            player.prepare(mediaSource);
+            MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(steps.get(selectedIndex).getVideoURL()), new DefaultDataSourceFactory(getContext(), userAgent), new DefaultExtractorsFactory(), null, null);
+            boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
+            if (haveResumePosition) {
+                player.seekTo(resumeWindow, resumePosition);
+            }
+            player.prepare(mediaSource, !haveResumePosition, false);
             player.setPlayWhenReady(true);
         }
     }
@@ -208,5 +216,47 @@ public class RecipeStepDetailFragment extends Fragment {
         outState.putParcelableArrayList(SELECTED_STEPS,steps);
         outState.putInt(SELECTED_INDEX,selectedIndex);
         outState.putString("Title",recipeName);
+        outState.putLong("resumePosition", resumePosition);
+        outState.putInt("resumeWindow", resumeWindow);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (Util.SDK_INT > 23) {
+            initializePlayer();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if ((Util.SDK_INT <= 23 || player == null)) {
+            initializePlayer();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (player!=null) {
+            updateResumePosition();
+            player.release();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (player!=null) {
+            updateResumePosition();
+            player.release();
+        }
+    }
+
+    private void updateResumePosition() {
+        resumeWindow = player.getCurrentWindowIndex();
+        resumePosition = Math.max(0, player.getCurrentPosition());
+        Log.d("EXO-up", resumePosition+"");
     }
 }

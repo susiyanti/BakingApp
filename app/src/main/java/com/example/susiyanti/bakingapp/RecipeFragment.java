@@ -39,8 +39,6 @@ public class RecipeFragment extends Fragment {
         final RecipeAdapter recipesAdapter =new RecipeAdapter((MainActivity)getActivity());
         recyclerView.setAdapter(recipesAdapter);
 
-
-
         if (rootView.getTag()!=null && rootView.getTag().equals("phone-land")){
             GridLayoutManager mLayoutManager = new GridLayoutManager(getContext(),4);
             recyclerView.setLayoutManager(mLayoutManager);
@@ -52,6 +50,12 @@ public class RecipeFragment extends Fragment {
 
         RecipeService iRecipe = RetrofitBuilder.Retrieve();
         Call<ArrayList<Recipe>> recipe = iRecipe.getRecipe();
+
+        final SimpleIdlingResource idlingResource = (SimpleIdlingResource)((MainActivity)getActivity()).getIdlingResource();
+
+        if (idlingResource != null) {
+            idlingResource.setIdleState(false);
+        }
 
         recipe.enqueue(new Callback<ArrayList<Recipe>>() {
             @Override
@@ -65,6 +69,10 @@ public class RecipeFragment extends Fragment {
                 recipesBundle.putParcelableArrayList(ALL_RECIPES, recipes);
 
                 recipesAdapter.setRecipeData(recipes,getContext());
+                if (idlingResource != null) {
+                    idlingResource.setIdleState(true);
+                    Log.d("ID", "idlestate true");
+                }
             }
 
             @Override

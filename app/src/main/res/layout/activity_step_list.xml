@@ -29,6 +29,7 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <ScrollView
+            android:id="@+id/recipe_ingredients_scroll"
             android:layout_width="match_parent"
             android:layout_height="150dp"
             android:scrollbarStyle="insideInset"

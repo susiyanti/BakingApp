@@ -6,7 +6,7 @@
     android:orientation="vertical">
 
     <com.google.android.exoplayer2.ui.SimpleExoPlayerView
-        android:id="@+id/playerView"
+        android:id="@+id/stepplayerView"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_marginTop="0dp"
