@@ -242,6 +242,7 @@ public class RecipeStepDetailFragment extends Fragment {
         if (player!=null) {
             updateResumePosition();
             player.release();
+            player = null;
         }
     }
 
@@ -251,6 +252,7 @@ public class RecipeStepDetailFragment extends Fragment {
         if (player!=null) {
             updateResumePosition();
             player.release();
+            player = null;
         }
     }
 
